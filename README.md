@@ -124,3 +124,7 @@ POST /guest
 ## 🙏 Thank You
 
 Thanks for checking out the Hotel Management System! Feel free to contribute or raise issues. Your feedback is welcome. 🏨
+
+## 👤 Author
+
+**Kalpesh Gangani**  
