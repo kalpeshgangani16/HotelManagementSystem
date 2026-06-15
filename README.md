@@ -166,6 +166,3 @@ All endpoint paths are prefixed with `/api`.
 
 Thanks for checking out the Hotel Management System! Feel free to contribute or raise issues. Your feedback is welcome. 🏨
 
-## 👤 Author
-
-**Kalpesh Gangani**
