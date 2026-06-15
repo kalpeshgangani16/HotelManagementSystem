@@ -57,7 +57,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void deleteRoom(Long roomId) {
     	Room room = roomDAO.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Guest not found with ID: " + roomId));
+                .orElseThrow(() -> new RuntimeException("Room not found with ID: " + roomId));
         roomDAO.delete(room);
     }
 }

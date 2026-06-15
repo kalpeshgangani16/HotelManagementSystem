@@ -19,6 +19,7 @@ import com.project.hotel_management.entities.Hotel;
 import com.project.hotel_management.entities.Room;
 import com.project.hotel_management.services.BookingService;
 import com.project.hotel_management.services.GuestService;
+import com.project.hotel_management.services.RoomService;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -29,6 +30,9 @@ public class BookingController {
 	
 	@Autowired
 	private GuestService guestService;
+	
+	@Autowired
+	private RoomService roomService;
 	
 	
 	//with provide guest id in JSON
@@ -49,8 +53,15 @@ public class BookingController {
 	    }
 
 	    Room room = booking.getRoom();
-	    if (room == null) {
+	    if (room == null || room.getId() == null) {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Room must be selected for booking");
+	    }
+
+	    try {
+	        Room existingRoom = roomService.getRoomById(room.getId());
+	        booking.setRoom(existingRoom);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Room not found with ID: " + room.getId());
 	    }
 
 	    boolean isRoomAvailable = bookingService.isRoomAvailable(room.getId(), booking.getCheckInDate(), booking.getCheckOutDate());
@@ -67,8 +78,15 @@ public class BookingController {
 	public ResponseEntity<?> createBooking2(@RequestBody Booking booking) {
 	    
 	    Room room = booking.getRoom();
-	    if (room == null) {
+	    if (room == null || room.getId() == null) {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Room must be selected for booking");
+	    }
+
+	    try {
+	        Room existingRoom = roomService.getRoomById(room.getId());
+	        booking.setRoom(existingRoom);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Room not found with ID: " + room.getId());
 	    }
 
 	    boolean isRoomAvailable = bookingService.isRoomAvailable(room.getId(), booking.getCheckInDate(), booking.getCheckOutDate());

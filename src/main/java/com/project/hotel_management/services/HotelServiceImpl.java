@@ -66,7 +66,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public void deleteHotelById(Long hotelId) {
     	Hotel hotel = hotelDAO.findById(hotelId)
-                .orElseThrow(() -> new RuntimeException("Guest not found with ID: " + hotelId));
+                .orElseThrow(() -> new RuntimeException("Hotel not found with ID: " + hotelId));
         hotelDAO.delete(hotel);
     }
 }

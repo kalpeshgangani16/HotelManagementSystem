@@ -1,4 +1,3 @@
-
 # 🏨 Hotel Management System
 
 A **Java-based Spring Boot application** designed to manage hotel operations, including guests, bookings, rooms, and hotels. The system features a RESTful architecture with clearly separated controller, service, DAO, and entity layers for maintainability and scalability.
@@ -7,25 +6,13 @@ A **Java-based Spring Boot application** designed to manage hotel operations, in
 
 ## ✅ Features
 
-- 🔐 Secure user authentication (Spring Security-ready)
-- 🛏️ Room and hotel management
-- 📅 Booking operations with full CRUD functionality
-- 👤 Guest data management
-- 🧠 Layered architecture (Controller, Service, DAO, Entity)
-- 🔁 RESTful APIs for front-end integration
-- 💾 Backend powered by JPA & Hibernate (supports H2/MySQL/etc.)
-
----
-
-## 🧠 Functional Overview
-
-| Endpoint | Description |
-|---------|-------------|
-| `/booking` | Manage bookings (create, update, delete, get) |
-| `/guest` | Manage guest information |
-| `/hotel` | CRUD operations for hotels |
-| `/room` | Room availability, details, and management |
-| `/auth/*` | User authentication endpoints (if security is active) |
+- 🔐 **Secure User Authentication:** Spring Security config with role-based access controls.
+- 🛏️ **Room & Hotel Management:** Create and manage hotel info and room details.
+- 📅 **Booking Operations:** Advanced booking management with conflict detection (ensures rooms cannot be double-booked).
+- 👤 **Guest Data Management:** Manage customer registrations and contacts.
+- 🧠 **Layered Architecture:** Controller, Service, DAO (Spring Data JPA), and Entity layers.
+- 🔁 **RESTful APIs:** JSON-based REST APIs ready for integration with frontend applications.
+- 💾 **Backend Persistence:** Powered by JPA & Hibernate with H2 Database (in-memory, no local setup required).
 
 ---
 
@@ -33,26 +20,32 @@ A **Java-based Spring Boot application** designed to manage hotel operations, in
 
 ```text
 hotel_management/
-├── controller/           # REST Controllers (Booking, Guest, Hotel, Room)
-│   ├── BookingController.java
-│   ├── GuestController.java
-│   ├── HotelController.java
-│   └── RoomController.java
-├── dao/                  # DAO interfaces for database access
-│   ├── BookingDAO.java
-│   ├── GuestDAO.java
-│   ├── HotelDAO.java
-│   └── RoomDAO.java
-├── entities/             # Entity classes (JPA models)
-│   ├── Booking.java
-│   ├── Guest.java
-│   ├── Hotel.java
-│   └── Room.java
-├── security/             # Spring Security configuration (optional)
-├── services/             # Business logic layer
-│   └── BookingService, GuestService, etc.
-├── HotelManagementApplication.java  # Main Spring Boot app
-└── PasswordEncoder.java             # Password encryption (if security is active)
+├── src/main/java/com/project/hotel_management/
+│   ├── controller/      # REST Controllers (Booking, Guest, Hotel, Room)
+│   │   ├── BookingController.java
+│   │   ├── GuestController.java
+│   │   ├── HotelController.java
+│   │   └── RoomController.java
+│   ├── dao/             # Data Access Objects (JPA Repositories)
+│   │   ├── BookingDAO.java
+│   │   ├── GuestDAO.java
+│   │   ├── HotelDAO.java
+│   │   └── RoomDAO.java
+│   ├── entities/        # JPA Entity models
+│   │   ├── Booking.java
+│   │   ├── Guest.java
+│   │   ├── Hotel.java
+│   │   └── Room.java
+│   ├── security/        # Spring Security Config
+│   │   └── hotelSecurity.java
+│   ├── services/        # Service interfaces & implementations
+│   │   ├── BookingService.java & BookingServiceImpl.java
+│   │   ├── GuestService.java & GuestServiceImpl.java
+│   │   ├── HotelService.java & HotelServiceImpl.java
+│   │   └── RoomService.java & RoomServiceImpl.java
+│   ├── HotelManagementApplication.java  # Main Application Entry Point
+│   └── PasswordEncoder.java             # BCrypt encryption utility for seeding users
+└── pom.xml              # Maven dependency management
 ```
 
 ---
@@ -63,59 +56,107 @@ hotel_management/
 
 ```bash
 git clone https://github.com/kalpeshgangani16/HotelManagementSystem.git
-cd HotelManagementSystem
+cd HotelManagementSystem/HotelManagementSystem-main
 ```
 
-### 2. 📦 Build the Project
+### 2. 🗄️ Database Setup
+The application is pre-configured to use an in-memory **H2 Database**. There is **no database installation or credential setup required** to run the application locally!
+
+#### 📊 H2 Database Console
+You can view the database tables, schemas, and run SQL queries directly from your browser:
+* **Console URL:** [http://localhost:8090/h2-console](http://localhost:8090/h2-console)
+* **JDBC URL:** `jdbc:h2:mem:hoteldb`
+* **Username:** `sa`
+* **Password:** *(leave blank)*
+
+### 3. 📦 Build & Run the Application
 
 Using **Maven**:
 
 ```bash
+# Build project
 mvn clean install
-```
 
-Or **Gradle**:
-
-```bash
-./gradlew build
-```
-
-### 3. 🚀 Run the Application
-
-Using Maven:
-
-```bash
+# Run application
 mvn spring-boot:run
 ```
 
-Using Gradle:
-
-```bash
-./gradlew bootRun
-```
-
-> Visit: [http://localhost:8080](http://localhost:8080)
+> **Note:** The server starts on port **`8090`** by default (configured in `application.properties`).
 
 ---
 
-## 🔐 Security (If Enabled)
+## 🔐 Security Configuration
 
-- 🔒 Passwords encrypted using `BCryptPasswordEncoder`
-- 🛡️ Role-based access control supported
-- 🧪 Token-based/JWT authentication ready for integration
+Access control is managed by Spring Security using HTTP Basic Authentication:
+* **Admin** (`ROLE_ADMIN`): Full CRUD permissions on hotels, rooms, and bookings (including deletions).
+* **Manager** (`ROLE_MANAGER`): Can manage bookings and rooms.
+* **Receptionist** (`ROLE_RECEPTIONIST`): Can manage guests and bookings.
+* **Guest** (`ROLE_GUEST`): Can view rooms and retrieve their own bookings.
+
+Passwords should be encrypted using `BCryptPasswordEncoder`. Use `PasswordEncoder.java` to generate encrypted passwords for your database seeding.
+
+---
+
+## 🧠 Functional API Overview
+
+All endpoint paths are prefixed with `/api`.
+
+| Controller | HTTP Method | Endpoint | Description |
+|------------|-------------|----------|-------------|
+| **Hotels** | `POST` | `/api/hotels` | Create hotel (restricted to max 1 hotel) |
+| | `GET` | `/api/hotels` | Retrieve hotel details |
+| | `PUT` | `/api/hotels/{hotelId}` | Update hotel details |
+| | `DELETE` | `/api/hotels/{hotelId}` | Remove hotel |
+| **Rooms** | `POST` | `/api/rooms` | Create a new room |
+| | `GET` | `/api/rooms` | List all rooms |
+| | `GET` | `/api/rooms/{roomId}` | Get specific room by ID |
+| | `PUT` | `/api/rooms/{roomId}` | Update room details |
+| | `DELETE` | `/api/rooms/{roomId}` | Delete a room |
+| **Guests** | `POST` | `/api/guests` | Register a new guest |
+| | `GET` | `/api/guests` | Get list of all registered guests |
+| | `GET` | `/api/guests/{guestId}` | Retrieve a guest profile |
+| | `PUT` | `/api/guests/{guestId}` | Update guest details |
+| | `DELETE` | `/api/guests/{guestId}`| Remove a guest |
+| **Bookings**| `POST` | `/api/bookings/with_guest` | Create booking using existing guest ID |
+| | `POST` | `/api/bookings/no_guest` | Create booking and guest simultaneously |
+| | `GET` | `/api/bookings` | List all bookings (custom summarized JSON format) |
+| | `GET` | `/api/bookings/{bookingId}` | Retrieve full booking info |
+| | `GET` | `/api/bookings/my/{firstName}` | Get all bookings matching guest's first name |
+| | `PUT` | `/api/bookings/{bookingId}` | Update check-in/out dates or room/guest |
+| | `DELETE` | `/api/bookings/{bookingId}` | Cancel / delete a booking |
 
 ---
 
 ## 🧪 Example API Usage
 
-Sample JSON to create a guest:
+### Create Guest (`POST /api/guests`)
 
+**Request Payload:**
 ```json
-POST /guest
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "phone": "1234567890"
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "1234567890"
+}
+```
+
+### Create Booking for New Guest (`POST /api/bookings/no_guest`)
+
+**Request Payload:**
+```json
+{
+  "checkInDate": "2026-07-01",
+  "checkOutDate": "2026-07-05",
+  "room": {
+    "id": 1
+  },
+  "guest": {
+    "firstName": "Alice",
+    "lastName": "Smith",
+    "email": "alice.smith@example.com",
+    "phoneNumber": "9876543210"
+  }
 }
 ```
 
@@ -127,4 +168,4 @@ Thanks for checking out the Hotel Management System! Feel free to contribute or 
 
 ## 👤 Author
 
-**Kalpesh Gangani**  
+**Kalpesh Gangani**

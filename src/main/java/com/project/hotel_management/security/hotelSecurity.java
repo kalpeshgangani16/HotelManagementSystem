@@ -36,20 +36,24 @@ public class hotelSecurity {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(configurer -> configurer
-        		// get for all
-                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "GUEST", "RECEPTIONIST", "MANAGER")
-        		
+                // permit all requests to H2 console
+                .requestMatchers("/h2-console/**").permitAll()
+
                 // get hotel for all
                 .requestMatchers(HttpMethod.GET, "/api/hotels/**").permitAll()
 
-                // for guest 
-                .requestMatchers(HttpMethod.GET, "/api/rooms/**").hasRole("GUEST")
+                // for guest (more specific booking endpoint must come before general bookings)
                 .requestMatchers(HttpMethod.GET, "/api/bookings/my/**").hasRole("GUEST")
-               
+                .requestMatchers(HttpMethod.GET, "/api/rooms/**").hasRole("GUEST")
 
                 // for receptionist 
                 .requestMatchers(HttpMethod.GET, "/api/bookings/**").hasRole("RECEPTIONIST")
                 .requestMatchers(HttpMethod.GET, "/api/guests/**").hasRole("RECEPTIONIST")
+
+                // get for all (fallback for other GET requests)
+                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "GUEST", "RECEPTIONIST", "MANAGER")
+        		
+                // post, put, delete modifications
                 .requestMatchers(HttpMethod.PUT, "/api/guests/**").hasRole("RECEPTIONIST")
                 .requestMatchers(HttpMethod.POST, "/api/guests/**").hasRole("RECEPTIONIST")
                 .requestMatchers(HttpMethod.POST, "/api/bookings/**").hasAnyRole("RECEPTIONIST","MANAGER")
@@ -67,7 +71,8 @@ public class hotelSecurity {
                 .requestMatchers(HttpMethod.DELETE, "/api/hotels/**").hasRole("ADMIN"))
 
             .httpBasic(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable());
+            .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
             return http.build();
     	
